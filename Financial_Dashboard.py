@@ -10,19 +10,20 @@ from bokeh.io import curdoc
 from bokeh.plotting import figure
 from bokeh.layouts import row, column
 from bokeh.models import TextInput, Button, DatePicker, MultiChoice
+from bokeh.events import ButtonClick
 
 
 # Function
-def loaddata(ticker1, ticker2, start, end):
+def load_data(ticker1, ticker2, start, end):
     df1 = yf.download(ticker1, start, end)
     df2 = yf.download(ticker2, start, end)
     return df1, df2
 
 
-def plotData(data, indicators, sync_axis=None):
+def plot_data(data, indicators, sync_axis=None):
     df = data
-    gain = df.close > df.open
-    loss = df.close < df.open
+    gain = df.Close > df.Open
+    loss = df.Close < df.Open
     width = 12 * 60 * 60 * 1000
 
     if sync_axis is not None:
@@ -42,30 +43,53 @@ def plotData(data, indicators, sync_axis=None):
     p.xaxis.major_label_orientation = math.pi / 4
     p.grid.grid_line_alpha = 0.25
 
-    p.segment(df.index, df.high, df.index, df.low, color="black")
+    p.segment(df.index, df.High, df.index, df.Low, color="black")
     p.vbar(
         df.index[gain],
         width,
-        df.open[gain],
-        df.close[gain],
+        df.Open[gain],
+        df.Close[gain],
         fill_color="#00ff00",
         line_color="#00ff00",
     )
     p.vbar(
         df.index[loss],
         width,
-        df.open[loss],
-        df.close[loss],
+        df.Open[loss],
+        df.Close[loss],
         fill_color="#FF0000",
         line_color="#FF0000",
     )
+
+    for indicator in indicators:
+        if indicator == "30 Day SMA":
+            df["SMA30"] = df["Close"].rolling(30).mean()
+            p.line(df.index, df.SMA30, color="purple", legend_label="30 Day SMA")
+        elif indicator == "100 Day SMA":
+            df["SMA100"] = df["Close"].rolling(100).mean()
+            p.line(df.index, df.SMA100, color="blue", legend_label="100 Day SMA")
+        elif indicator == "Linear Regression Line":
+            par = np.polyfit(range(len(df.index.values)), df.Close.values, 1, full=True)
+            slope = par[0][0]
+            intercept = par[0][1]
+            y_pred = [slope * i + intercept for i in range((len(df.index.values)))]
+            p.segment(
+                df.index[0],
+                y_pred[0],
+                df.index[-1],
+                y_pred[-1],
+                legend_label="Linear Regression",
+                color="red",
+            )
+        p.legend.location = "top_left"
+        p.legend.click_policy = "hide"
     return p
 
 
 def on_button_click(ticker1, ticker2, start, end, indicators):
-    df1, df2 = loaddata(ticker1, ticker2, start, end)
-    p1 = plotData(df1, indicators)
-    p2 = plotData(df2, indicators, sync_axis=p1.x_range)
+    df1, df2 = load_data(ticker1, ticker2, start, end)
+    p1 = plot_data(df1, indicators)
+    p2 = plot_data(df2, indicators, sync_axis=p1.x_range)
     curdoc().clear()
     curdoc().add_root(layout)
     curdoc().add_root(row(p1, p2))
@@ -87,13 +111,10 @@ date_picker_to = DatePicker(
     max_date=dt.datetime.now().strftime("%Y-%m-%d"),
 )
 
-indicator_Choice = MultiChoice(
+indicator_choice = MultiChoice(
     options=[
         "100 Day SMA",
         "30 Day SMA",
-        "15 Day SMA",
-        "7 Day SMA",
-        "1 Day SMA",
         "Linear Regression Line",
     ]
 )
@@ -105,7 +126,7 @@ load_button.on_click(
         stock2_text.value,
         date_picker_from.value,
         date_picker_to.value,
-        indicator_Choice.value,
+        indicator_choice.value,
     )
 )
 
@@ -114,7 +135,7 @@ layout = column(
     stock2_text,
     date_picker_from,
     date_picker_to,
-    indicator_Choice,
+    indicator_choice,
     load_button,
 )
 ####

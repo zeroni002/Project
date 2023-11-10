@@ -16,7 +16,12 @@ pricing_data, fundametal_data, news = st.tabs(
 
 with pricing_data:
     st.header("Price Movements")
+    data2 = data
+    data2["% Change"] = data["Adj Close"] / data["Adj Close"].shift(1) - 1
+    data2.dropna(inplace=True)
     st.write(data)
+    annual_return = data2["% Change"].mean() * 252 * 100
+    st.write("Average Annual Return is", annual_return, "%")
 
 with fundametal_data:
     st.write("Fundamental")

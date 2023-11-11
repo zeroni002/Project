@@ -61,3 +61,4 @@ with news:
         st.write(f"Title Sentiment{title_sentiment}")
         news_sentiment = df_news["sentiment_summary"][i]
         st.write(f"News Sentiment{news_sentiment}")
+# Great

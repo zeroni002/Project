@@ -5,7 +5,6 @@ from fund_data import epic_code
 
 # from stocknews import StockNews
 # import plotly.graph_objects as go
-
 st.title("Stock Dashboard")
 ticker = ""
 ticker = st.sidebar.text_input("Ticker")
@@ -68,6 +67,7 @@ if ticker != "":
         cf = cash_flow.T[2:]
         cf.columns = list(cash_flow.T.iloc[0])
         st.write(cf)
+# when there is no input
 else:
     st.image(
         "https://th.bing.com/th/id/R.8f0be08586539a46c323c57df3d7dc54?rik=ZT6cRGsp1TebmQ&pid=ImgRaw&r=0"

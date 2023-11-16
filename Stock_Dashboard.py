@@ -4,7 +4,8 @@ from alpha_vantage.fundamentaldata import FundamentalData
 from fund_data import epic_code
 
 # from stocknews import StockNews
-# import plotly.graph_objects as go
+import plotly.graph_objects as go
+
 st.title("Stock Dashboard")
 ticker = ""
 ticker = st.sidebar.text_input("Ticker")
@@ -15,22 +16,23 @@ if ticker != "":
     data = yf.download(ticker, start=start_date, end=end_date)
     fig = px.line(data, x=data.index, y=data["Adj Close"], title=ticker)
     st.plotly_chart(fig)
-    # fig2 = go.Figure(
-    #    data=[
-    #        go.Candlestick(
-    #            x=data["Date"],
-    #            open=data["Open"],
-    #            high=data["High"],
-    #            low=data["Low"],
-    #            close=data["Close"],
-    #            name=ticker,
-    #        )
-    #    ]
-    # )
-    # fig2.update_xaxes(type="category")
-    # fig2.update_layout(height=600)
-    # st.plotly_chart(fig2, use_container_width=True)
-    # st.write(data)
+    # PG 76 in Data Science
+    st.header("Candle Graph")
+    fig2 = go.Figure(
+        data=[
+            go.Candlestick(
+                x=data.index,
+                open=data["Open"],
+                high=data["High"],
+                low=data["Low"],
+                close=data["Close"],
+                name=ticker,
+            )
+        ]
+    )
+    fig2.update_xaxes(type="category")
+    fig2.update_layout(height=600)
+    st.plotly_chart(fig2, use_container_width=True)
 
     pricing_data, fundametal_data, news = st.tabs(
         ["Pricing Data", "Fundamental Data", "Top 10 News"]

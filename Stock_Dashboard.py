@@ -16,7 +16,6 @@ if ticker != "":
     data = yf.download(ticker, start=start_date, end=end_date)
     fig = px.line(data, x=data.index, y=data["Adj Close"], title=ticker)
     st.plotly_chart(fig)
-    # PG 76 in Data Science
     st.header("Candle Graph")
     fig2 = go.Figure(
         data=[
